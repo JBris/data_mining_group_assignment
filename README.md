@@ -22,7 +22,7 @@ If you're using Docker, execute [build.sh](build.sh) to get started.
 
 ## DataScience 
 
-The datascience container offers both R and Python packages. A list of R packages and Python modules can be found in the [Dockerfile](Dockerfile). 
+The datascience container offers both R and Python packages. A list of R and Python dependencies can be found in the [Dockerfile](Dockerfile). See [requirements.txt](scripts/user/requirements.txt) for the list of Python packages and their respective versions. See [packages.txt](scripts/user/packages.txt) for the list of R packages and their respective versions.
 
 As the [docker-compose.yml](docker-compose.yml) file shows, this repo extends from the [rocker/tidyverse image](https://hub.docker.com/r/rocker/tidyverse) which already includes the tidyverse collection and RStudio server.
 
