@@ -4,6 +4,7 @@
 ## Table of Contents  
 
 * [Introduction](#introduction) 
+* [Data](#data)
 * [DataScience](#datascience)
 * [InfluxDB](#influxdb) 
 * [PostgreSQL](#postgresql)  
@@ -19,6 +20,12 @@ InfluxDB and Grafana are included in the Docker stack for database storage and v
 Postgres and Adminer are also included for those who are unfamiliar with Influx.
 
 If you're using Docker, execute [build.sh](build.sh) to get started.
+
+## Data 
+
+The provided data set should be placed in the [data directory.](scripts/user/data), and renamed to *initial_dataset.csv*. 
+
+The [initial_processing script](scripts/user/data_processing/initial_processing.py) performs some initial processing on the data. It renames the columns, drops unneeded columns, converts channels and sites to factors, and factorizes the channel ID-key pairs.
 
 ## DataScience 
 
@@ -40,6 +47,8 @@ Postgres can be used instead of Influx if required.
 
 Database dumps can be imported and exported using `make dbimp` and `make dbexp` respectively. Dumps can be found in the `data` directory.
 
+`make csvimp` will import CSV files into the database. Ensure that the CSV data is placed in the [data directory](data). Supply the *f* argument to specify the file to use. E.g. `make csvimp f=processed_dataset`.
+ 
 The following settings can be configured in your .env file:
 
 | Name          | Default Value |  

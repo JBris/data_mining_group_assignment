@@ -55,5 +55,6 @@ dbexp:
 dbimp:
 	docker-compose exec postgres "dbimp.sh"
 
+#make csvimp f=processed_dataset
 csvimp:
-	docker-compose exec postgres psql -U "$(DB_USER)" -d "$(DB_NAME)" -c "COPY data FROM '/var/data/initial_dataset.csv' WITH (FORMAT csv);"
+	docker-compose exec postgres psql -U "$(DB_USER)" -d "$(DB_NAME)" -c "COPY data FROM '/var/data/${f}.csv' DELIMITER ',' CSV HEADER;"
