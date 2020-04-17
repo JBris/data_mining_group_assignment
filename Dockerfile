@@ -24,6 +24,7 @@ ENV R_PACKAGES="\
     lime \
     anomalize \
     imputeTS \
+    png \
 " 
 
 RUN install2.r --error $R_PACKAGES

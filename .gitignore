@@ -15,3 +15,5 @@
 **/.keras
 **/.python_history
 **/core
+
+scripts/user/data/
