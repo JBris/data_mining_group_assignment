@@ -38,9 +38,9 @@ ggplot(data, aes(x=date_time, y=usage)) +
 
 # Applying smoothers
 
-project_summary <- function(group) {
+project_summary <- function(group, interval) {
   project_ts <- data %>%
-    group_by(g = !!group, t = cut(timestamp, "24 hour")) %>%
+    group_by(g = !!group, t = cut(timestamp, interval)) %>%
     summarise(v = mean(usage))
   
   project_ts %>% ggplot(aes(x=t, y=v)) +
@@ -49,5 +49,5 @@ project_summary <- function(group) {
          color=NULL)+theme(legend.position = 'bottom')
 }
 
-project_summary(data$site_group)
-project_summary(data$channel_id_group)
+project_summary(data$site_group, "24 hour")
+project_summary(data$channel_id_group, "24 hour")
