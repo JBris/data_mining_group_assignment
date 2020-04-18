@@ -43,6 +43,8 @@ project_summary <- function(group, interval) {
     group_by(g = !!group, t = cut(timestamp, interval)) %>%
     summarise(v = mean(usage))
   
+  project_ts$t <- project_ts$t %>% as.Date(format="%Y-%m-%d")
+    
   project_ts %>% ggplot(aes(x=t, y=v)) +
     geom_line(aes(group=g, color=g)) +
     labs(x='Date Time', y='Power Usage (kWh)',
