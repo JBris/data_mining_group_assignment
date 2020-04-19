@@ -24,6 +24,7 @@ ENV R_PACKAGES="\
     lime \
     anomalize \
     imputeTS \
+    tsoutliers \
     png \
 " 
 
