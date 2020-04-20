@@ -24,7 +24,13 @@ def convert_load_main_incomer(df):
 
 def drop_columns(df):
   #Drop unneeded columns
-  cols = ['channel_unit', 'channel_interval_frequency', 'load_utility', 'load_main_incomer']
+  cols = [
+    'channel_unit', 
+    'channel_interval_frequency', 
+    'load_utility', 
+    'load_main_incomer', 
+    'channel_key'
+  ]
   df = df.drop(cols, 1)
   print(df.columns)
   return df
@@ -42,7 +48,7 @@ def site_to_factor(df):
   return df
 
 def factorize_channel_columns(df):
-  cols = ['channel_id', 'channel_key']
+  cols = ['channel_id']
   df[cols] = df[cols].apply(lambda x: pd.factorize(x)[0])
   return df
 
@@ -56,5 +62,4 @@ df = rename_columns(df)
 df = drop_columns(df)
 df = site_to_factor(df)
 df = factorize_channel_columns(df)
-df = create_channel_tuple_factor(df)
 df.to_csv('~/data/processed_dataset.csv', index=False)
