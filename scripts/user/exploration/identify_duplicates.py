@@ -33,5 +33,16 @@ summary = df.groupby(['channel_id']).apply(
       "duplicates": x.date_time.size -x.date_time.nunique()      
     })
 )
-
 print(summary)
+
+mapped_df = df.groupby(['channel_id']).apply(
+    lambda x: pd.DataFrame(
+      data=x
+    ).assign(
+      duplicate = lambda x: x.date_time.duplicated(keep=False)
+    ) 
+) 
+
+duplicates = mapped_df.loc[mapped_df['duplicate'] == True]
+print(duplicates)
+print(duplicates.duplicate.size)
