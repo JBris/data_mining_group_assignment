@@ -28,6 +28,7 @@ ENV R_PACKAGES="\
     imputeTS \
     tsoutliers \
     png \
+    caret \
 " 
 
 RUN install2.r --error $R_PACKAGES
