@@ -5,10 +5,13 @@ library(tidyverse)
 library(dplyr)
 library(anomalize)
 
-data <- read_csv("data/processed_dataset.csv")
+data <- read_csv("data/processed_dataset.csv") %>%
+  mutate(date_time = as.POSIXct(date_time, format="%d/%m/%Y %H:%M", tz="UTC")) %>%
+  group_by(channel_id) %>%
+  distinct(date_time, .keep_all = T)  %>%
+  ungroup()
 
 avg_daily_use <- data %>%
-  mutate(date_time = as.POSIXct(date_time, format="%d/%m/%Y %H:%M", tz="UTC")) %>%
   group_by(g= channel_id, t = cut(date_time, "24 hour")) %>%
   summarise(v = mean(usage))  %>%
   mutate(t = as.POSIXct(t, format="%Y-%m-%d")) %>%
@@ -17,7 +20,6 @@ avg_daily_use <- data %>%
 avg_daily_use %>% glimpse()
 
 avg_hourly_use <- data %>%
-  mutate(date_time = as.POSIXct(date_time, format="%d/%m/%Y %H:%M", tz="UTC")) %>%
   group_by(g= channel_id, t = cut(date_time, "1 hour")) %>%
   summarise(v = mean(usage))  %>%
   mutate(t = as.POSIXct(t, format="%Y-%m-%d %H:%M:%S", tz="UTC")) %>%
@@ -26,7 +28,6 @@ avg_hourly_use <- data %>%
 avg_hourly_use %>% glimpse()
 
 fifteen_min_use <- data %>%
-  mutate(t = as.POSIXct(date_time, format="%d/%m/%Y %H:%M", tz="UTC")) %>%
   group_by(g = channel_id) %>%
   mutate(v = usage) %>%
   select(g, t, v) %>%
@@ -39,6 +40,7 @@ fifteen_min_use %>% glimpse()
 # Daily outliers
 
 daily_anomalized <- avg_daily_use %>%
+  group_by(g) %>%
   time_decompose(
     v, 
     frequency = "1 week", 
@@ -70,6 +72,7 @@ daily_anomalized %>%
 # Hourly outliers
 
 hourly_anomalized <- avg_hourly_use %>%
+  group_by(g) %>%
   time_decompose(
     v, 
     frequency = "1 day", 
@@ -101,6 +104,7 @@ hourly_anomalized %>%
 # 15 minute outliers
 
 fifteen_min_anomalized <- fifteen_min_use %>%
+  group_by(g) %>%
   time_decompose(
     v, 
     frequency = "1 day", 
