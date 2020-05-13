@@ -13,7 +13,7 @@ df = pd.read_csv(
        infer_datetime_format = True,
        dayfirst = True,
     ).assign(
-      missing=False
+      missing=0
     )
 
 print(df)
@@ -27,7 +27,7 @@ def pad_datetime(df):
   
   new_df = pd.DataFrame({
       'date_time': date_range,
-      'missing': True,
+      'missing': 1,
       'site': df.site.iloc[0],
       'channel_id': df.channel_id.iloc[0],
     },
@@ -60,7 +60,7 @@ summary = padded_df.groupby(['site', 'channel_id']).apply(
 )
 print(summary)
 
-missing = padded_df.loc[padded_df['missing'] == True]
+missing = padded_df.loc[padded_df['missing'] == 1]
 print(missing)
 missing_observation_count = missing.groupby(['channel_id']).apply(
   lambda x: x.date_time.nunique()
