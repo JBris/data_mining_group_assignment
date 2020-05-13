@@ -68,7 +68,7 @@ def fit_model(df):
     test_df.to_csv(f"~/data/isolation_forest_channel_{channel_id}.csv", index=False)
     return test_df
     
-  test_df = model_channel(0)
+  test_df = model_channel(20)
   print(test_df['anomaly'].value_counts())
   print(test_df)
   
