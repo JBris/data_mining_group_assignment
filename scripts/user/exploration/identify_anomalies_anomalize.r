@@ -86,11 +86,17 @@ c20_hourly_anomalized <- avg_hourly_use %>%
   ) %>%
   anomalize(
     remainder, 
-    method="iqr", # or gesd
+    method="gesd", # or iqr
     alpha = 0.05
   ) 
 
-c20_hourly_anomalized %>% plot_anomalies(ncol = 3, alpha_dots = 10, time_recomposed = F)
+c20_hourly_anomalized %>% plot_anomalies(
+  ncol = 3, 
+  alpha_dots = 1, 
+  time_recomposed = F,
+  size_dots = 2,
+  size_circles = 2
+)
 
 hourly_anomalized <- avg_hourly_use %>%
   group_by(g) %>%
