@@ -1,3 +1,4 @@
+import datetime
 import numpy as np
 import pandas as pd
 
@@ -9,8 +10,8 @@ df = pd.read_csv(
          'site',
          'usage',
        ], 
-       parse_dates = ['date_time'],
-       infer_datetime_format = True,
+       parse_dates = ['date_time'], 
+       date_parser = lambda s: datetime.datetime.strptime(s,'%d/%m/%Y %H:%M'),
        dayfirst = True,
     ).assign(
       missing=0
@@ -67,4 +68,9 @@ missing_observation_count = missing.groupby(['channel_id']).apply(
 )
 print(missing_observation_count)
 
-padded_df.to_csv('~/data/dupes_and_missing_processed.csv', index=False)
+padded_df['month'] = padded_df.date_time.dt.month
+padded_df['day'] = padded_df.date_time.dt.day
+padded_df['hour'] = padded_df.date_time.dt.hour
+padded_df['minute'] = padded_df.date_time.dt.minute
+
+padded_df.to_csv('~/data/final_processed.csv', index=False)
