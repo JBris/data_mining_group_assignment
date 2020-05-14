@@ -18,6 +18,7 @@ ENV PYTHON_PACKAGES="\
     imutils \
     tabulate \
     nbformat \
+    hdbscan \
     pyemma \
 " 
 
