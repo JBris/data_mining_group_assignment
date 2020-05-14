@@ -12,6 +12,7 @@ ENV PYTHON_PACKAGES="\
     matplotlib \
     pandas \
     tensorflow==2.0 \
+    keras==2.3.1 \
     scipy \
     scikit-learn \
     seaborn \
