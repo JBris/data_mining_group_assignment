@@ -1,6 +1,7 @@
 import datetime
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 df = pd.read_csv(
       '~/data/processed_dataset.csv',
@@ -11,13 +12,23 @@ df = pd.read_csv(
          'usage',
        ], 
        parse_dates = ['date_time'], 
-       date_parser = lambda s: datetime.datetime.strptime(s,'%d/%m/%Y %H:%M'),
+       date_parser = lambda s: datetime.strptime(s,'%d/%m/%Y %H:%M'),
        dayfirst = True,
-    ).assign(
-      missing=0
     )
 
+df["missing"] = pd.isna(df.usage).astype(int)
 print(df)
+
+#Daylight savings
+#Start: 2019-04-07 02:00:00
+#End: 2019-09-29 02:45:00
+df.loc[ (df['date_time'] >= '2019-04-07 03:00:00') & (df['date_time'] <= '2019-09-29 01:45:00'), 'date_time' ] =  df['date_time'] + pd.to_timedelta(1, unit='h')
+
+def shift_dupes(df): 
+  df.loc[df.date_time.duplicated(keep='first'), 'date_time'] = df['date_time'] + pd.to_timedelta(1, unit='h')
+  return df
+  
+df = df.groupby('channel_id').apply(shift_dupes)
 
 def pad_datetime(df):
   date_range = pd.date_range(

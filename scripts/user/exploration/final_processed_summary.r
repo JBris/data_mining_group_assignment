@@ -2,7 +2,7 @@ library(readr)
 library(tidyverse)
 library(dplyr)
 
-data <- read_csv("data/dupes_and_missing_processed.csv") %>%   
+data <- read_csv("data/final_processed.csv") %>%   
   mutate(date_time = as.POSIXct(date_time, format="%d/%m/%Y %H:%M", tz="UTC")) %>% 
   mutate(
     site = as.factor(site),

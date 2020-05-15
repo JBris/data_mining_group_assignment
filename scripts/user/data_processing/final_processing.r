@@ -47,5 +47,5 @@ missing_observations <- data_padded %>%
 missing_observation_count <- missing_observations %>% 
   group_by(channel_id, site) %>%
   summarise(
-    unique_dates = unique(date_time) %>% length()
+    duplicate_dates = unique(date_time) %>% length()
   )
