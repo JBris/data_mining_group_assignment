@@ -5,6 +5,7 @@ import math
 import warnings  
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV, train_test_split, TimeSeriesSplit
 
 def pivot(df):
   channel_df = pd.pivot_table(
@@ -33,28 +34,35 @@ def load_data():
   return pivot(df), pivot(df_20)
 
 def fit_model(df):
-  channel = 20
-  model = LocalOutlierFactor(
-    n_neighbors = int(
-      math.sqrt( df.iloc[:,channel:channel+1].size )
-    ), 
-    algorithm = 'ball_tree',
-    metric = 'minkowski',
-    leaf_size = 50,
-    contamination = 0.05,
-    novelty = False, #For unsupervised learning, set this to false
-    n_jobs = -1,
-  )
-  
-  def model_channel(i):
-    model.fit(df.iloc[:,i:i+1].values)
-    pred = model.fit_predict(df.iloc[:,i:i+1].values)
+  def model_channel(i, model):
+    #scoring
+    tuned = {
+      'algorithm':['ball_tree'], 
+      'contamination':[0.05],
+      'metric':['minkowski'],
+      'leaf_size':[50],
+      'novelty':[True],
+    }  
+    
+    X_train, X_test = train_test_split(df.iloc[:,i:i+1].values, train_size=0.5, random_state=1234, shuffle=True)
+    tss = TimeSeriesSplit(n_splits=10)
+    model = GridSearchCV(
+      estimator=model, 
+      param_grid=tuned, 
+      cv=tss,
+      scoring=('r2', 'neg_mean_squared_error'),
+      refit='neg_mean_squared_error',
+    )
+    
+    model.fit(X_train, X_test)
+    print("GridCV", model.cv_results_)
+    pred = model.predict(df.iloc[:,i:i+1].values)
       
     test_df = pd.DataFrame()
     test_df['date_time'] = df.index
     test_df = test_df.sort_values(by='date_time')
   
-    test_df['score']=model.negative_outlier_factor_
+    test_df['score']=model.decision_function(df.iloc[:,i:i+1].values)
     test_df['usage']=df.iloc[:,i:i+1].values
     test_df['anomaly'] = pred
     #outliers=test_df.loc[test_df['anomaly'] == -1]
@@ -69,7 +77,20 @@ def fit_model(df):
     test_df.to_csv(f"~/data/lof_channel_{channel_id}.csv", index=False)
     return test_df
     
-  test_df = model_channel(channel)
+  channel = 20
+  model = LocalOutlierFactor(
+    n_neighbors = int(
+      math.sqrt( df.iloc[:,channel:channel+1].size )
+    ), 
+    algorithm = 'ball_tree',
+    metric = 'minkowski',
+    leaf_size = 50,
+    contamination = 0.05,
+    novelty = False, #For unsupervised learning, set this to false
+    n_jobs = -1,
+  )
+  
+  test_df = model_channel(channel, model)
   print(test_df['anomaly'].value_counts())
   print(test_df)
   

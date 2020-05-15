@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import warnings  
 from sklearn.covariance import EllipticEnvelope
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV, train_test_split, TimeSeriesSplit
 
 def pivot(df):
   channel_df = pd.pivot_table(
@@ -32,16 +33,28 @@ def load_data():
   return pivot(df), pivot(df_20)
 
 def fit_model(df):
-  model = EllipticEnvelope(
-    store_precision = True,
-    assume_centered = False,
-    support_fraction = None,
-    contamination = 0.005,
-    random_state = 1234,
-  )
-  
-  def model_channel(i):
-    model.fit(df.iloc[:,i:i+1].values)
+  def model_channel(i, model):
+    #scoring
+    tuned = {
+      'store_precision':[True], 
+      'assume_centered':[False],
+      'support_fraction':[None],
+      'contamination':[0.05],
+      'random_state':[1234],
+    }
+    
+    X_train, X_test = train_test_split(df.iloc[:,i:i+1].values, train_size=0.5, random_state=1234, shuffle=True)
+    tss = TimeSeriesSplit(n_splits=10)
+    model = GridSearchCV(
+      estimator=model, 
+      param_grid=tuned, 
+      cv=tss,
+      scoring=('r2', 'neg_mean_squared_error'),
+      refit='neg_mean_squared_error',
+    )
+    
+    model.fit(X_train, X_test)
+    print("GridCV", model.cv_results_)
     pred = model.predict(df.iloc[:,i:i+1].values)
       
     test_df = pd.DataFrame()
@@ -62,13 +75,20 @@ def fit_model(df):
       
     test_df.to_csv(f"~/data/elliptic_envelope_channel_{channel_id}.csv", index=False)
     return test_df
-    
-  test_df = model_channel(20)
+  
+  channel_id = 20
+  model = EllipticEnvelope(
+    store_precision = True,
+    assume_centered = False,
+    support_fraction = None,
+    contamination = 0.005,
+    random_state = 1234,
+  )
+  test_df = model_channel(channel_id, model)
   print(test_df['anomaly'].value_counts())
   print(test_df)
   
   # visualization
-  channel_id = test_df.channel_id.values[0]
   fig, ax = plt.subplots(figsize=(10, 6))
   fig.suptitle(f"Anomalies for Channel {channel_id}")
   a = test_df.loc[test_df['anomaly'] == -1, ['date_time', 'usage']] #anomaly

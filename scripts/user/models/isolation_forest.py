@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import warnings  
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV, train_test_split, TimeSeriesSplit
 
 def pivot(df):
   channel_df = pd.pivot_table(
@@ -32,21 +33,32 @@ def load_data():
   return pivot(df), pivot(df_20)
 
 def fit_model(df):
-  model = IsolationForest(
-    n_estimators=100, 
-    max_samples='auto', 
-    #contamination='auto',
-    contamination=float(.005), 
-    max_features=1.0, 
-    bootstrap=False, 
-    n_jobs=-1, 
-    random_state=1234, 
-    verbose=0,
-    warm_start=False,
-  )
-  
-  def model_channel(i):
-    model.fit(df.iloc[:,i:i+1].values)
+  def model_channel(i, model):
+    #scoring
+    tuned = {
+      'n_estimators':[100], 
+      'max_samples':['auto'],
+      'contamination':[.05],
+      'max_features':[1],
+      'bootstrap':[False],
+      'random_state':[1234],
+      'warm_start':[False],
+      'bootstrap':[False]
+    }  
+    
+    X_train, X_test = train_test_split(df.iloc[:,i:i+1].values, train_size=0.5, random_state=1234, shuffle=True)
+    tss = TimeSeriesSplit(n_splits=10)
+    
+    model = GridSearchCV(
+      estimator=model, 
+      param_grid=tuned, 
+      cv=tss,
+      scoring=('r2', 'neg_mean_squared_error'),
+      refit='neg_mean_squared_error',
+    )
+    
+    model.fit(X_train, X_test)
+    print("GridCV", model.cv_results_)
     pred = model.predict(df.iloc[:,i:i+1].values)
       
     test_df = pd.DataFrame()
@@ -64,11 +76,32 @@ def fit_model(df):
     test_df['shift'] = test_df['usage'].shift(-1)
     test_df['percentage_change'] = ((test_df['usage'] - test_df['shift']) / test_df['usage']) * 100
     test_df = test_df.drop('shift', 1)
-      
+  
+    #scoring
+    scores = cross_validate(
+      model, 
+      df.iloc[:,i:i+1].values, 
+      cv=10, 
+      n_jobs = -1,
+      return_train_score=True
+    )
+    
     test_df.to_csv(f"~/data/isolation_forest_channel_{channel_id}.csv", index=False)
     return test_df
     
-  test_df = model_channel(20)
+  model = IsolationForest(
+    n_estimators=100, 
+    max_samples='auto', 
+    #contamination='auto',
+    contamination=float(.005), 
+    max_features=1.0, 
+    bootstrap=False, 
+    n_jobs=-1, 
+    random_state=1234, 
+    verbose=0,
+    warm_start=False,
+  )
+  test_df = model_channel(20, model)
   print(test_df['anomaly'].value_counts())
   print(test_df)
   
