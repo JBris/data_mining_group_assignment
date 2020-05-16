@@ -21,6 +21,9 @@ ENV PYTHON_PACKAGES="\
     nbformat \
     hdbscan \
     pyemma \
+    impyute \
+    datawig \
+    xgboost \
 " 
 
 RUN pip3 install --upgrade pip && pip3 install --no-cache-dir $PYTHON_PACKAGES
@@ -32,6 +35,7 @@ ENV R_PACKAGES="\
     tsoutliers \
     png \
     caret \
+    mlr \
 " 
 
 RUN install2.r --error $R_PACKAGES
