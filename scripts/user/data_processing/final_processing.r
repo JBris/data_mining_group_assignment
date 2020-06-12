@@ -47,5 +47,17 @@ missing_observations <- data_padded %>%
 missing_observation_count <- missing_observations %>% 
   group_by(channel_id, site) %>%
   summarise(
-    duplicate_dates = unique(date_time) %>% length()
+    missing = unique(date_time) %>% length()
   )
+  
+missing_observations_summary <- missing_observations %>% 
+  filter(between(date_time, as.POSIXct("2019-09-29 02:00:00"), as.POSIXct("2019-09-29 02:45:00"))) %>% 
+  group_by(date_time) %>%
+  group_modify(~{
+    data.frame(
+      n_channel_dupes = .x$channel_id %>% unique() %>% length(),
+      n_site_dupes = .x$site %>% unique() %>% length()
+    )
+  })
+
+

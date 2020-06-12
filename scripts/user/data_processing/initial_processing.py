@@ -29,7 +29,7 @@ def drop_columns(df):
     'channel_interval_frequency', 
     'load_utility', 
     'load_main_incomer', 
-    'channel_key'
+    #'channel_key'
   ]
   df = df.drop(cols, 1)
   print(df.columns)
@@ -42,8 +42,15 @@ def site_to_factor(df):
     ele = ele.replace('site', '')
     ele = ele.strip()
     return ele
+  def chan_to_factor(ele):
+    ele = ele.lower()
+    ele = ele.replace('activeenergy', '')
+    ele = ele.strip()
+    return ele
     
   df.site = df.site.apply(to_factor)
+  df.channel_key = df.channel_key.apply(chan_to_factor)
+  
   print(df.site)
   return df
 
