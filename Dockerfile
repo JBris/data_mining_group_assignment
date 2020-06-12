@@ -36,7 +36,7 @@ ENV R_PACKAGES="\
     BBmisc \
     mice \
     bnstruct \
-    mlr \
+    mlr3 \
     missForest \
     Amelia \
 " 
