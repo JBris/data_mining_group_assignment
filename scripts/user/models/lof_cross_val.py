@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import warnings  
-from sklearn.ensemble import IsolationForest
+from sklearn.neighbors import LocalOutlierFactor
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, f1_score, roc_auc_score, balanced_accuracy_score
 from sklearn.model_selection import GridSearchCV, train_test_split, TimeSeriesSplit
@@ -52,13 +52,13 @@ def fit_model(df):
     
     #params
     param_grid = {
-      'n_estimators':[50, 100, 150, 200],
-      'max_samples':['auto'],
-      'contamination':[.01, .05, .1, .15, .2],
-      'max_features':[.5, 1.0],
-      'bootstrap':[False],
-      'random_state':[1234],
-      'warm_start':[False],
+      'n_neighbors':[10, 20, 30, 40],
+      'algorithm':['ball_tree', 'kd_tree'],
+      'leaf_size':[10, 20, 30, 40],
+      'metric':['minkowski', 'euclidean'],
+      'contamination':[.01, .05, .1],
+      'novelty':[True],
+      'n_jobs':[-1],
     }
     
     X_train, X_test, Y_train, Y_test = train_test_split(
@@ -69,7 +69,7 @@ def fit_model(df):
     )
     cv = TimeSeriesSplit(n_splits=3)
     clf = GridSearchCV(
-      estimator=IsolationForest(),
+      estimator=LocalOutlierFactor(),
       param_grid=param_grid,
       cv=cv,
       scoring=['neg_mean_squared_error', 'f1'],
@@ -84,7 +84,7 @@ def fit_model(df):
       scoring_params_df.append( pd.DataFrame(clf.cv_results_[param], columns=[param]) )
     tuning_results = pd.concat(scoring_params_df, axis = 1)
     print(tuning_results)
-    tuning_results.to_csv(f"~/data/isolation_forest_tuning_results.csv", index=False)
+    tuning_results.to_csv(f"~/data/lof_tuning_results.csv", index=False)
     Y_hat = clf.predict(X_test)
     pred_results = {
       'mse' : mean_squared_error(Y_test, Y_hat),
